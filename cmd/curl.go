@@ -16,7 +16,11 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"isready/pkg"
+	url2 "net/url"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -24,22 +28,54 @@ import (
 // curlCmd represents the curl command
 var curlCmd = &cobra.Command{
 	Use:   "curl",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "checks if a service available with a http request",
+	Long:  `checks if a service available with a http request.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("curl called")
+
+		host, _ := cmd.Flags().GetString("host")
+		headers, _ := cmd.Flags().GetString("header")
+		code, _ := cmd.Flags().GetInt32Slice("code")
+		method, _ := cmd.Flags().GetString("method")
+		insecure, _ := cmd.Flags().GetBool("insecure")
+
+		url, err := url2.Parse(host)
+		if err != nil {
+			os.Stderr.WriteString("http error: " + err.Error())
+			os.Exit(23)
+		}
+
+		header := make(map[string][]string)
+		if headers != "" {
+			err = json.Unmarshal([]byte(headers), header)
+			if err != nil {
+				os.Stderr.WriteString("could not parse http header parameter: " + err.Error())
+				os.Exit(23)
+			}
+		}
+
+		req := pkg.Http{
+			Timeout:            timeout,
+			Method:             method,
+			Header:             header,
+			URL:                url,
+			StatusCodes:        code,
+			SkipInsecureVerify: insecure,
+		}
+
+		err = req.Connect()
+		if err != nil {
+			os.Stderr.WriteString("http error: " + err.Error())
+			os.Exit(23)
+		}
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(curlCmd)
 
-	curlCmd.Flags().StringArrayP("header", "h", nil, "headers for http request")
+	curlCmd.Flags().StringP("header", "h", "", "headers for http request")
 	curlCmd.Flags().Int32Slice("code", nil, "accepted http response codes")
 	curlCmd.Flags().String("host", "localhost", "url for http request")
 	curlCmd.Flags().StringP("method", "X", "GET", "http request method")

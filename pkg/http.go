@@ -14,7 +14,7 @@ type Http struct {
 	Method             string
 	Header             map[string][]string
 	URL                *url.URL
-	StatusCodes        []int
+	StatusCodes        []int32
 	SkipInsecureVerify bool
 }
 
@@ -28,7 +28,7 @@ func (h *Http) Connect() error {
 	}
 
 	for _, c := range h.StatusCodes {
-		if c == resp.StatusCode {
+		if int(c) == resp.StatusCode {
 			return nil
 		}
 	}
