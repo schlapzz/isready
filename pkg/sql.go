@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/lib/pq"
 	_ "gorm.io/driver/postgres"
@@ -24,49 +23,31 @@ type SQLConnection struct {
 	Database string
 	Timeout  time.Duration
 	Retries  int
+	FailOnPG bool //defaults to true. A error is thrown if the client can establish a connectoin to the database, but the call fails because of an postgres error. (e.g. wrhong credentials, non existing database...=
 }
 
-func OpenSQL(connection SQLConnection) error {
+func (s *SQLConnection) Connect() error {
 
-	var err error
-	var connString string
-
-	switch connection.Driver {
-	case "mysql":
-		connString = getMySQLConnection(connection)
-	case "postgres":
-		connString = getPGConnection(connection)
-	default:
-		return errors.New("no matching database driver found for: " + connection.Driver)
-	}
-
-	var db *sql.DB
-
-	for i := 0; i < connection.Retries; i++ {
-		db, err = sql.Open(connection.Driver, connString)
-		if err == nil {
-
-			err = db.Ping()
-
-			if err == nil {
-				fmt.Println("connected")
-				continue
-			} else {
-				if _, ok := err.(*pq.Error); ok {
-					fmt.Printf("PG Ping failed: %s\n", err.Error())
-					return err
-				}
-			}
-		}
-		fmt.Println("...")
-		time.Sleep(10 * time.Second)
-	}
-
+	db, err := sql.Open(s.Driver, getPGConnection(*s))
 	if err != nil {
-		fmt.Println("error : " + err.Error())
+		return err
+	}
+
+	err = db.Ping()
+
+	if err != nil && !s.FailOnPG {
+		_, ok := err.(pq.PGError)
+		if ok {
+			//dont handle if type is from pgError
+			return nil
+		}
 	}
 
 	return err
+}
+
+func OpenSQL(connection SQLConnection) error {
+	return ConnectWithRetries(&connection, connection.Retries, 5*time.Second, connection.Timeout)
 }
 
 func getMySQLConnection(c SQLConnection) string {

@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"isready/pkg"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -40,6 +41,7 @@ to quickly create a Cobra application.`,
 		host, _ := cmd.Flags().GetString("host")
 		database, _ := cmd.Flags().GetString("database")
 		port, _ := cmd.Flags().GetInt("port")
+		failOnPG, _ := cmd.Flags().GetBool("failpg")
 
 		conn := pkg.SQLConnection{
 			Driver:   "postgres",
@@ -50,11 +52,13 @@ to quickly create a Cobra application.`,
 			Database: database,
 			Timeout:  timeout,
 			Retries:  int(retries),
+			FailOnPG: failOnPG,
 		}
 
 		err := pkg.OpenSQL(conn)
 		if err != nil {
-			fmt.Errorf("pg error: " + err.Error())
+			os.Stderr.WriteString("pg error: " + err.Error())
+			os.Exit(23)
 		}
 	},
 }
@@ -74,6 +78,7 @@ func init() {
 	psqlCmd.Flags().String("host", "localhost", "postgres host")
 	psqlCmd.Flags().Int("port", 5432, "postgres database port")
 	psqlCmd.Flags().String("database", "default", "name of the postgres database")
+	psqlCmd.Flags().Bool("failpg", true, "A error is thrown if the client can establish a connection to the database, but the call fails because of an postgres error. (e.g. wrong credentials, non existing database...=")
 
 	rootCmd.AddCommand(psqlCmd)
 

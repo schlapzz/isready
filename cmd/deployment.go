@@ -17,13 +17,15 @@ package cmd
 
 import (
 	"fmt"
+	"isready/pkg"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
-// curlCmd represents the curl command
-var curlCmd = &cobra.Command{
-	Use:   "curl",
+// deploymentCmd represents the deployment command
+var deploymentCmd = &cobra.Command{
+	Use:   "deployment",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -32,17 +34,33 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("curl called")
+		fmt.Println("deployment called")
+
+		name, _ := cmd.Flags().GetString("name")
+		namespace, _ := cmd.Flags().GetString("namespace")
+		kubeconfig, _ := cmd.Flags().GetString("kubeconfig")
+
+		err := pkg.IsReady(
+			pkg.KubernetesConfig{
+				KubeConfig: kubeconfig,
+				Name:       name,
+				Namespace:  namespace,
+				Timeout:    timeout,
+			})
+
+		if err != nil {
+			os.Stderr.WriteString("deployment error: " + err.Error())
+			os.Exit(6)
+		}
+
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(curlCmd)
+	rootCmd.AddCommand(deploymentCmd)
 
-	curlCmd.Flags().StringArrayP("header", "h", nil, "headers for http request")
-	curlCmd.Flags().Int32Slice("code", nil, "accepted http response codes")
-	curlCmd.Flags().String("host", "localhost", "url for http request")
-	curlCmd.Flags().StringP("method", "X", "GET", "http request method")
-	curlCmd.Flags().BoolP("insecure", "k", false, " By default, every SSL connection curl makes is verified to be secure. This option allows curl to proceed and operate even for server connections otherwise considered insecure.")
+	deploymentCmd.Flags().StringP("namespace", "s", "default", "namespace of deployment resource")
+	deploymentCmd.Flags().StringP("name", "n", "", "name of deployment resource")
+	deploymentCmd.Flags().StringP("kubeconfig", "c", "~/.kube/config", "path to kubeconfig file")
 
 }
