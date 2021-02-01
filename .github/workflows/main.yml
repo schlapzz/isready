@@ -5,7 +5,7 @@ on:
     tags:
     - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 jobs:
-  test:
+  build:
     needs: create_release
     strategy:
       matrix:
@@ -33,3 +33,16 @@ jobs:
         asset_path: ./isready-${{ matrix.os }}
         asset_name: isready-${{ matrix.os }}
         asset_content_type: application/octet-stream
+
+  create_release:
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
