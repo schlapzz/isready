@@ -10,9 +10,12 @@ type Connecter interface {
 	Connect() error
 }
 
+var Timeout string
+
 func ConnectWithRetries(c Connecter, retries int, interval, timeout time.Duration) error {
 	t := time.Now()
-	ctx, _ := context.WithDeadline(context.TODO(), t.Add(timeout))
+	deadline := t.Add(timeout)
+	ctx, _ := context.WithDeadline(context.TODO(), deadline)
 	result := make(chan error)
 
 	go func() {
