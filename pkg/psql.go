@@ -15,15 +15,16 @@ import (
 //curl
 
 type SQLConnection struct {
-	Driver   string
-	Username string
-	Password string
-	Host     string
-	Port     int
-	Database string
-	Timeout  time.Duration
-	Retries  int
-	FailOnPG bool //defaults to true. A error is thrown if the client can establish a connectoin to the database, but the call fails because of an postgres error. (e.g. wrhong credentials, non existing database...=
+	Driver         string
+	Username       string
+	Password       string
+	Host           string
+	Port           int
+	Database       string
+	Timeout        time.Duration //Total timeout for try
+	ConnectTimeout time.Duration //Postgres connection timeout
+	Retries        int
+	FailOnPG       bool //defaults to true. A error is thrown if the client can establish a connectoin to the database, but the call fails because of an postgres error. (e.g. wrhong credentials, non existing database...=
 }
 
 func (s *SQLConnection) Connect() error {
@@ -47,7 +48,7 @@ func (s *SQLConnection) Connect() error {
 }
 
 func OpenSQL(connection SQLConnection) error {
-	return ConnectWithRetries(&connection, connection.Retries, 5*time.Second, connection.Timeout)
+	return ConnectWithRetries(&connection, connection.Retries, connection.ConnectTimeout, connection.Timeout)
 }
 
 func getMySQLConnection(c SQLConnection) string {
