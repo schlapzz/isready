@@ -60,7 +60,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&timeoutString, "timeout", "10s", "timeout for connection")
+	rootCmd.PersistentFlags().StringVar(&timeoutString, "timeout", "30s", "timeout for connection")
 	rootCmd.PersistentFlags().Int32Var(&retries, "retries", 3, "number of retries before abort")
 
 }

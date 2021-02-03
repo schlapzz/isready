@@ -28,8 +28,8 @@ import (
 // curlCmd represents the curl command
 var curlCmd = &cobra.Command{
 	Use:   "curl",
-	Short: "checks if a service available with a http request",
-	Long:  `checks if a service available with a http request.`,
+	Short: "checks if a service is available with a http request",
+	Long:  `checks if a service is available with a http request.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("curl called")
 

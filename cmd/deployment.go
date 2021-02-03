@@ -52,6 +52,8 @@ isready deployment -n app1 -n example-namespace -c "~/.kube/config"  --timeout 9
 			os.Exit(6)
 		}
 
+		fmt.Println("deployment ready")
+
 	},
 }
 

@@ -27,13 +27,8 @@ import (
 // psqlCmd represents the psql command
 var psqlCmd = &cobra.Command{
 	Use:   "psql",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Check if postgresql database is ready",
+	Long:  `Check if postgresql database is ready`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("psql called")
 
@@ -68,6 +63,8 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			os.Stderr.WriteString("pg error: " + err.Error())
 			os.Exit(23)
+		} else {
+			fmt.Println("connection established")
 		}
 	},
 }
@@ -82,7 +79,7 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	psqlCmd.Flags().String("user", "foo", "postgres usernamea")
+	psqlCmd.Flags().String("user", "foo", "postgres username")
 	psqlCmd.Flags().String("password", "bar", "postgres password")
 	psqlCmd.Flags().String("host", "localhost", "postgres host")
 	psqlCmd.Flags().Int("port", 5432, "postgres database port")
