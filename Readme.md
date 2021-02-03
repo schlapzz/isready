@@ -24,3 +24,11 @@ Flags:
 
 Use "is-ready [command] --help" for more information about a command.
 ```
+
+#### Usage
+
+**Kubernetes deployment**  
+`isready deployment -n app -s sample-namespace -c "~/.kube/config"`
+
+**Postgresql**  
+`isready psql -h database.namespace -u user1 -p secret -p 5432 --database public`
