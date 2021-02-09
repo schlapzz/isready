@@ -33,6 +33,10 @@ jobs:
         asset_path: ./isready-${{ matrix.os }}
         asset_name: isready-${{ matrix.os }}
         asset_content_type: application/octet-stream
+    - name: webhook
+      uses: joelwmale/webhook-action@master
+      with:
+        url: https://gitlab.puzzle.ch/api/v4/projects/2263/ref/master/trigger/pipeline?token=${{ secrets.GITLAB_TOKEN }}
 
   create_release:
     name: Create release
